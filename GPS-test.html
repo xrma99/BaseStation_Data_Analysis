@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+	<style type="text/css">
+		body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+	</style>
+	<script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=9GtUDSUfrtfcu6TA8KDm5wv9zwWRwjii"></script>
+	<script type="text/javascript" src="path.js"></script>
+	<title>每个人的轨迹运动</title>
+</head>
+<body>
+	<div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+	// 百度地图API功能
+	var map = new BMap.Map("allmap");
+	map.centerAndZoom(new BMap.Point(121.44271,31.23636), 15);
+	map.addControl(new BMap.NavigationControl());        
+	map.addControl(new BMap.ScaleControl({anchor: BMAP_ANCHOR_TOP_LEFT}));
+	map.enableScrollWheelZoom(true);//可以放缩
+	
+	var myIcon = new BMap.Icon("http://lbsyun.baidu.com/jsdemo/img/Mario.png", new BMap.Size(32, 70), {imageOffset: new BMap.Size(0, 0)});
+	var polyline ;
+	
+	var options = {
+			onSearchComplete: function(results){
+				if (driving.getStatus() == BMAP_STATUS_SUCCESS){
+					// 获取第一条方案
+					var plan = results.getPlan(0);
+					// 获取方案的驾车线路
+					var route = plan.getRoute(0);
+					//返回路线的地理坐标点数组。（自 1.2 新增）
+					var points = route.getPath();
+					polyline = new BMap.Polyline(points, {strokeColor: "#FF0000",strokeOpacity:1,strokeWeight:4,enableMassClear:true});
+					//alert(points.length);
+					map.addOverlay(polyline);          //增加折线
+				}
+			}
+			//,
+			//renderOptions:{map: map, autoViewport: true}
+		};
+	var driving = new BMap.DrivingRoute(map, options);
+	  
+	  
+	i=0;
+	function playLine(i){
+						
+		if(i==0){//第一个点 直接添加	
+			var marker = new BMap.Marker(new BMap.Point(pts[i].Longitude,pts[i].Latitude),{icon:myIcon});  // 创建标注
+			map.addOverlay(marker); 
+
+			marker.setLabel(new BMap.Label("我是第"+(i+1)+"个点",{offset:new BMap.Size(20,-10)}));
+			map.panTo(new BMap.Point(pts[i].Longitude,pts[i].Latitude));
+			i++;
+			setTimeout(function(){
+				map.removeOverlay(marker);
+				playLine(i);
+			},2000)
+		}else{//获取PolyLine并添加 添加点
+		
+		
+			if(i<=pts.length){
+
+				driving.search(new BMap.Point(pts[i-1].Longitude,pts[i-1].Latitude), new BMap.Point(pts[i].Longitude,pts[i].Latitude)); 
+				map.addOverlay(polyline);
+				var marker = new BMap.Marker(new BMap.Point(pts[i].Longitude,pts[i].Latitude),{icon:myIcon});  // 创建标注
+			    map.addOverlay(marker);
+				marker.setLabel(new BMap.Label("我是第"+(i+1)+"个点",{offset:new BMap.Size(20,-10)}));
+				map.panTo(new BMap.Point(pts[i].Longitude,pts[i].Latitude));
+				i++;
+				setTimeout(function(){
+					map.removeOverlay(marker);
+					playLine(i);
+				},2000)
+			}
+		}
+		
+		
+		
+	}
+	playLine(i);
+	
+	
+</script>

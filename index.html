@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+        body, html,#allmap {width: 100%;height: 100%;overflow: hidden;margin:0;font-family:"微软雅黑";}
+    </style>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=9GtUDSUfrtfcu6TA8KDm5wv9zwWRwjii"></script>
+    <script type="text/javascript" src="newlocation.js"></script>
+	<title>批量转换经纬度</title>
+</head>
+<body>
+    <div id="allmap"></div>
+</body>
+</html>
+<script type="text/javascript">
+	
+    var points = [new BMap.Point(121.44622,31.22202),
+                  new BMap.Point(121.44588,31.22276),
+                  new BMap.Point(121.44631,31.22315),
+                  new BMap.Point(121.44228,31.22086),
+                  new BMap.Point(121.44229,31.21961)
+    ];
+	
+	
+	
+    //地图初始化
+    var bm = new BMap.Map("allmap");
+    bm.centerAndZoom(new BMap.Point(121.44622,31.22202), 15);
+
+    //坐标转换完之后的回调函数
+   
+   
+	translateCallback = function (data){
+	  if(data.status === 0) {
+	    for (var i = 0; i < dots.length; i++) {
+			if(i==0 || (dots[i].Longitude!=dots[i-1].Longitude || dots[i].Latitude!=dots[i-1].Latitude)){
+				var tmp=new BMap.Point(dots[i].Longitude,dots[i].Latitude);
+				var marker=new BMap.Marker(tmp);
+				bm.addOverlay(marker);
+				bm.setCenter(tmp);
+			}/*
+			(function() {
+				var thePoint = dots[i];
+				marker.addEventListener("click",
+				//显示信息的方法
+				function() {
+					showInfo(this,thePoint);
+				});
+			})();*/
+	    }
+	  }
+	}
+	
+    setTimeout(function(){
+        var convertor = new BMap.Convertor();
+        convertor.translate(points, 1, 5, translateCallback)
+    }, 1000);
+</script>
